@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do App - Lab 5</title>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <main class="todo-app">
+      <h1>Lista de Tareas</h1>
+
+      <form id="task-form" class="task-form">
+        <input
+          id="task-input"
+          type="text"
+          placeholder="Escribe una tarea..."
+          autocomplete="off"
+        />
+        <button type="submit">Agregar</button>
+      </form>
+
+      <p id="error-message" class="error-message" aria-live="polite"></p>
+
+      <section class="task-info">
+        <p>Tareas pendientes: <span id="pending-count">0</span></p>
+      </section>
+
+      <ul id="task-list" class="task-list"></ul>
+    </main>
+
+    <script src="./index.js"></script>
+  </body>
+</html>
