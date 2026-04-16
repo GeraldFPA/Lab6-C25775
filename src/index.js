@@ -1,8 +1,8 @@
-const taskForm = document.getElementById("task-form");
-const taskInput = document.getElementById("task-input");
-const taskList = document.getElementById("task-list");
-const pendingCount = document.getElementById("pending-count");
-const errorMessage = document.getElementById("error-message");
+const taskForm = document.querySelector("#task-form");
+const taskInput = document.querySelector("#task-input");
+const taskList = document.querySelector("#task-list");
+const pendingCount = document.querySelector("#pending-count");
+const errorMessage = document.querySelector("#error-message");
 
 function updatePendingCount() {
   const totalTasks = taskList.querySelectorAll(".task-item").length;
