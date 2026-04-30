@@ -1,76 +1,66 @@
-const taskForm = document.querySelector("#task-form");
-const taskInput = document.querySelector("#task-input");
-const taskList = document.querySelector("#task-list");
-const pendingCount = document.querySelector("#pending-count");
-const errorMessage = document.querySelector("#error-message");
+import { addTask, countPendingTasks, removeTask, toggleTask } from "./task.js";
+import { loadTasks, saveTasks } from "./storage.js";
+import {
+  clearError,
+  createUIRefs,
+  renderTasks,
+  showError,
+  updatePendingCount,
+} from "./ui.js";
 
-function updatePendingCount() {
-  const totalTasks = taskList.querySelectorAll(".task-item").length;
-  const completedTasks = taskList.querySelectorAll(".task-text.completed").length;
-  pendingCount.textContent = String(totalTasks - completedTasks);
+const ui = createUIRefs();
+let tasks = loadTasks();
+
+function renderApp() {
+  renderTasks(ui.list, tasks);
+  updatePendingCount(ui.pendingCount, countPendingTasks(tasks));
 }
 
-function clearError() {
-  errorMessage.textContent = "";
+function persistAndRender() {
+  saveTasks(tasks);
+  renderApp();
 }
 
-function showError(message) {
-  errorMessage.textContent = message;
-}
-
-function createTaskElement(taskText) {
-  const taskItem = document.createElement("li");
-  taskItem.className = "task-item";
-
-  const leftContainer = document.createElement("div");
-  leftContainer.className = "task-left";
-
-  const completeCheckbox = document.createElement("input");
-  completeCheckbox.type = "checkbox";
-  completeCheckbox.setAttribute("aria-label", "Marcar tarea como completada");
-
-  const textSpan = document.createElement("span");
-  textSpan.className = "task-text";
-  textSpan.textContent = taskText;
-
-  completeCheckbox.addEventListener("change", () => {
-    textSpan.classList.toggle("completed", completeCheckbox.checked);
-    updatePendingCount();
-  });
-
-  leftContainer.appendChild(completeCheckbox);
-  leftContainer.appendChild(textSpan);
-
-  const deleteButton = document.createElement("button");
-  deleteButton.className = "delete-btn";
-  deleteButton.type = "button";
-  deleteButton.textContent = "Eliminar";
-
-  deleteButton.addEventListener("click", () => {
-    taskItem.remove();
-    updatePendingCount();
-  });
-
-  taskItem.appendChild(leftContainer);
-  taskItem.appendChild(deleteButton);
-
-  return taskItem;
-}
-
-taskForm.addEventListener("submit", (event) => {
+ui.form.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  const taskText = taskInput.value.trim();
-
+  const taskText = ui.input.value.trim();
   if (!taskText) {
-    showError("No se puede agregar una tarea vacía.");
+    showError(ui.errorMessage, "No se puede agregar una tarea vacia.");
     return;
   }
 
-  clearError();
-  const taskElement = createTaskElement(taskText);
-  taskList.appendChild(taskElement);
-  taskInput.value = "";
-  taskInput.focus();
-  updatePendingCount();
+  clearError(ui.errorMessage);
+  tasks = addTask(tasks, taskText);
+  persistAndRender();
+  ui.input.value = "";
+  ui.input.focus();
 });
+
+ui.input.addEventListener("input", () => {
+  if (ui.errorMessage.textContent) {
+    clearError(ui.errorMessage);
+  }
+});
+
+ui.list.addEventListener("change", (event) => {
+  const checkbox = event.target.closest("input[type='checkbox'][data-task-id]");
+  if (!checkbox) {
+    return;
+  }
+
+  tasks = toggleTask(tasks, checkbox.dataset.taskId);
+  persistAndRender();
+});
+
+ui.list.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest("button.delete-btn[data-task-id]");
+  if (!deleteButton) {
+    return;
+  }
+
+  tasks = removeTask(tasks, deleteButton.dataset.taskId);
+  persistAndRender();
+});
+
+renderApp();
